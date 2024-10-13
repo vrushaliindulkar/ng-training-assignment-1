@@ -1,0 +1,128 @@
+<div class="min-h-screen bg-gray-100 p-4">
+  <!-- Header Section -->
+  <div class="flex justify-between items-center mb-4">
+    <div class="flex items-center">
+      <div class="bg-blue-500 text-white p-2 rounded-full">
+        <span class="font-bold ">Task</span>
+      </div>
+      <h1 class="ml-2 text-2xl font-semibold items-center">Tasks</h1>
+    </div>
+    <div class="space-x-4">
+      <button
+        (click)="toggleForm()"
+        class="bg-yellow-200 text-gray-700 py-2 px-4 rounded hover:bg-yellow-300"
+      >
+        New Task
+      </button>
+      <button
+        (click)="refreshTasks()"
+        class="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300">
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="flex justify-end mb-4">
+    <input
+      type="text"
+      placeholder="Search tasks..."
+      [(ngModel)]="searchQuery"
+      class="border border-gray-300 rounded py-2 px-4 w-64 focus:outline-none focus:border-blue-500"
+    />
+  </div>
+
+  <div
+    class="bg-white shadow-md rounded-lg overflow-hidden task-list"
+    [ngClass]="{ blurred: isFormVisible }"
+    *ngIf="tasks.length > 0"
+  >
+    <table class="table-auto w-full text-left">
+      <thead class="bg-gray-100 text-gray-700">
+        <tr>
+          <th class="px-4 py-2">
+            <input type="checkbox" (change)="toggleSelectAll($event)" />
+          </th>
+          <th class="px-4 py-2">Assigned To</th>
+          <th class="px-4 py-2">Status</th>
+          <th class="px-4 py-2">Due Date</th>
+          <th class="px-4 py-2">Priority</th>
+          <th class="px-4 py-2">Description</th>
+          <th class="px-4 py-2">Actions</th>
+        </tr>
+      </thead>
+     
+      <tbody>
+        <tr
+          *ngFor="let task of paginatedTasks"
+          class="border-b hover:bg-gray-50"
+        >
+          <td class="px-4 py-2">
+            <input type="checkbox" [(ngModel)]="task.selected" />
+          </td>
+          <td class="px-4 py-2">
+            <a href="{{ task.assignedTo }}" class="text-blue-500" >{{ task.assignedTo }}</a>
+          </td>
+          <td class="px-4 py-2">{{ task.status }}</td>
+          <td class="px-4 py-2">{{ task.dueDate }}</td>
+          <td class="px-4 py-2">{{ task.priority }}</td>
+          <td class="px-4 py-2">{{ task.description }}</td>
+          <td class="px-4 py-2">
+            <button (click)="editTask(task)" class="text-blue-500">Edit</button>
+            <button (click)="deleteTaskPrompt(task)" class="text-red-500">
+              Delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+
+     
+      <div class="flex justify-between items-center mt-4">
+        <span class="text-gray-600">Page {{ currentPage }} of {{ totalPages }}</span>
+        <div class="space-x-2">
+          <button
+            (click)="previousPage()"
+            [disabled]="currentPage === 1"
+            class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <button
+            (click)="nextPage()"
+            [disabled]="currentPage >= totalPages"
+            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+      
+    </table>
+  </div>
+
+  <div *ngIf="tasks.length === 0" class="text-center text-gray-500">
+    <p>No tasks found. Click "New Task" to add one.</p>
+  </div>
+
+  <app-task-form
+    *ngIf="isFormVisible"
+    [taskToEdit]="taskToEdit"
+    (close)="isFormVisible = false"
+    (addTask)="handleAddTask($event)"
+    style="
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+    "
+  >
+  </app-task-form>
+
+  <app-confirmation-dialog
+    *ngIf="isDeleteDialogVisible"
+    (confirmDelete)="deleteTask(taskToDelete)"
+    (cancelDelete)="isDeleteDialogVisible = false"
+  >
+  </app-confirmation-dialog>
+</div>
